@@ -81,6 +81,13 @@ class TestEcho(unittest.TestCase):
         # that will be visible to your other test methods
         pass
 
+    def test_help(self):
+        """Check if usage output matches what is expected."""
+        args = ["-h"]
+        stdout, stderr = run_capture(self.module.__file__, args)
+        with open('USAGE') as f:
+            usage = f.read()
+        self.assertEqual('\n'.join(stdout) + '\n', usage)
     def test_parser(self):
         """Check if create_parser() returns a parser object"""
         result = self.module.create_parser()
@@ -110,9 +117,25 @@ class TestEcho(unittest.TestCase):
         assert output, "The program did not print anything."
         self.assertEqual(output[0], "hello world")
 
+    def test_lower_long(self):
+        """Check if short option '-l' performs lowercasing"""
+        args = ["--lower", "HELLO WORLD"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "hello world")
+
     def test_upper_short(self):
         """Check if short option '-u' performs uppercasing"""
         args = ["-u", "hello world"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "HELLO WORLD")
+    
+    def test_upper_long(self):
+        """Check if short option '-u' performs uppercasing"""
+        args = ["--upper", "hello world"]
         with Capturing() as output:
             self.module.main(args)
         assert output, "The program did not print anything."
@@ -126,14 +149,27 @@ class TestEcho(unittest.TestCase):
         assert output, "The program did not print anything."
         self.assertEqual(output[0], "Hello World")
 
-    def test_all_short(self):
-        """Check if short option '-u, -t, -l' performs all flags"""
-        args = ["-utl", "heLLo"]
+    def test_title_long(self):
+        """Check if short option '-t' performs titlecasing"""
+        args = ["--title", "hello world"]
         with Capturing() as output:
             self.module.main(args)
         assert output, "The program did not print anything."
-        self.assertEqual(output[0], "Hello")
+        self.assertEqual(output[0], "Hello World")
 
+    def test_no_options(self):
+        args = ["hello world"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "hello world")
+    
+    def test_all_options(self):
+        args = ["-tul", "hElLo wORld"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "Hello World")
 
 if __name__ == '__main__':
     unittest.main()
